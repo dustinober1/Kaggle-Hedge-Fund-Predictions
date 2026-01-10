@@ -90,7 +90,7 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
   - H10: 0.217
   - H25: 0.180
 - Weight transformation: **sqrt(weight + 1)**
-- **Weight-adaptive shrinkage** helps slightly (shrink low-weight samples more)
+- **Weight-adaptive shrinkage** helps slightly (shrink high-weight samples more)
 
 ## Project Structure
 ```

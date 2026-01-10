@@ -49,7 +49,7 @@ We tested different $\alpha$ values for Huber loss (transition between quadratic
 #### Experiment B: Per-Sample Shrinkage
 We tried adapting shrinkage based on prediction confidence (magnitude) and sample weight.
 - Uniform shrinkage: Ratio 0.9983
-- **Weight-adaptive**: **Ratio 0.9982** (Shrink low-weight samples more)
+- **Weight-adaptive**: **Ratio 0.9982** (Shrink high-weight samples more)
 - **Conclusion**: Low-weight samples are noisier; shrinking their predictions more aggressively helps slightly.
 
 #### Experiment C: Cross-Validated Per-Horizon Shrinkage
