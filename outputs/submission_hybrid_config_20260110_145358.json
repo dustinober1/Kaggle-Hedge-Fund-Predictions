@@ -1,0 +1,11 @@
+{
+  "timestamp": "20260110_145358",
+  "strategy": "Hybrid (Base for H1, FE for H3+)",
+  "huber_alpha": 0.1,
+  "shrinkages": {
+    "1": 0.293,
+    "3": 0.27,
+    "10": 0.32,
+    "25": 0.34
+  }
+}

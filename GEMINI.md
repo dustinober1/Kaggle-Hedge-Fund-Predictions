@@ -79,18 +79,22 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - ⭐ Created `src/06_strategy_refinement_v2.py` - **BREAKTHROUGH!** Beat zero baseline
 - ⭐ Created `src/07_optimized_submission.py` - Final submission (score: 0.053)
 - ⭐ Created `src/08_advanced_tuning.py` - Advanced tuning (Huber alpha, CV shrinkage)
+- ⭐ Created `src/09_feature_engineering.py` - Added Market/Sector features
+- ⭐ Created `src/10_hybrid_submission.py` - Validated Hybrid Strategy (Base for H1, FE for others)
 
-## Current Best Score: ~0.053 (CV Estimate: 0.048) 🎉
+## Current Best Score: ~0.054 (CV Estimate) 🎉
 
-**Winning Configuration (Advanced):**
-- Loss function: **Huber (alpha=0.1)** - Very robust to outliers
-- **Robust Per-Horizon Shrinkages** (from 3-fold CV):
-  - H1: 0.293
-  - H3: 0.250
-  - H10: 0.217
-  - H25: 0.180
-- Weight transformation: **sqrt(weight + 1)**
-- **Weight-adaptive shrinkage** helps slightly (shrink high-weight samples more)
+**Winning Configuration (Hybrid):**
+- **Model**: LightGBM Huber (alpha=0.1) with sqrt(w+1) weights
+- **Features**: 
+  - Horizon 1: Original features only (Market noise distracts)
+  - Horizon 3, 10, 25: Original + Market/Sector aggregates (Macro trends help)
+- **Shrinkage**:
+  - H1: 0.29 (Base)
+  - H3: 0.27 (FE)
+  - H10: 0.32 (FE)
+  - H25: 0.34 (FE)
+- **Weight-adaptive shrinkage** helps slightly (Apply stronger shrinkage to high-weight samples)
 
 ## Project Structure
 ```
@@ -141,11 +145,12 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 ### What Works
 - ✅ **Huber loss with alpha=0.1**: More robust than standard Huber (alpha=1.0) or MSE
 - ✅ **Per-horizon models** with horizon-specific shrinkage
-- ✅ **Shrinkage toward zero** (0.18 to 0.29 depending on horizon)
-- ✅ **Weight-adaptive shrinkage**: Applying more shrinkage to low-weight samples improves ratio
-- ✅ **Simple LightGBM** with max_depth=6, num_leaves=31
+- ✅ **Hybrid Feature Sets**: Base for H1, Extended (Market/Sector) for H3+
+- ✅ **Shrinkage toward zero** (0.27 to 0.34 depending on horizon)
+- ✅ **Weight-adaptive shrinkage**: Applying more shrinkage to high-weight samples improves ratio
 
 ### What Doesn't Work
+- ❌ Using Market features for Horizon 1 (adds noise)
 - ❌ Using raw weights during training (too extreme)
 - ❌ Predicting non-zero without shrinkage (ratio >> 1)
 - ❌ Training only on high-weight samples (loses generalization)
