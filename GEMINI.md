@@ -78,14 +78,19 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - ⭐ Created `src/05_high_weight_focus.py` - tested 7 high-weight strategies
 - ⭐ Created `src/06_strategy_refinement_v2.py` - **BREAKTHROUGH!** Beat zero baseline
 - ⭐ Created `src/07_optimized_submission.py` - Final submission (score: 0.053)
+- ⭐ Created `src/08_advanced_tuning.py` - Advanced tuning (Huber alpha, CV shrinkage)
 
-## Current Best Score: 0.0529 🎉
+## Current Best Score: ~0.053 (CV Estimate: 0.048) 🎉
 
-**Winning Configuration:**
-- Loss function: **Huber** (robust to outliers)
+**Winning Configuration (Advanced):**
+- Loss function: **Huber (alpha=0.1)** - Very robust to outliers
+- **Robust Per-Horizon Shrinkages** (from 3-fold CV):
+  - H1: 0.293
+  - H3: 0.250
+  - H10: 0.217
+  - H25: 0.180
 - Weight transformation: **sqrt(weight + 1)**
-- Per-horizon models with horizon-specific shrinkage
-- Shrinkage values: H1=0.12, H3=0.06, H10=0.27, H25=0.29
+- **Weight-adaptive shrinkage** helps slightly (shrink low-weight samples more)
 
 ## Project Structure
 ```
@@ -134,9 +139,10 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 4. **Per-horizon models help**: Different horizons need different shrinkage values
 
 ### What Works
-- ✅ **Huber loss** with sqrt(weight+1) transformation
+- ✅ **Huber loss with alpha=0.1**: More robust than standard Huber (alpha=1.0) or MSE
 - ✅ **Per-horizon models** with horizon-specific shrinkage
-- ✅ **Shrinkage toward zero** (0.06 to 0.29 depending on horizon)
+- ✅ **Shrinkage toward zero** (0.18 to 0.29 depending on horizon)
+- ✅ **Weight-adaptive shrinkage**: Applying more shrinkage to low-weight samples improves ratio
 - ✅ **Simple LightGBM** with max_depth=6, num_leaves=31
 
 ### What Doesn't Work
