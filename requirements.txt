@@ -1,1 +1,34 @@
+# Kaggle Hedge Fund Time Series Forecasting Competition
+# Core data science packages
 kaggle
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=14.0.0  # For parquet file support
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.18.0
+
+# Jupyter
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipywidgets>=8.0.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+lightgbm>=4.0.0
+xgboost>=2.0.0
+catboost>=1.2.0
+
+# Deep Learning for Time Series
+pytorch-lightning>=2.1.0
+torch>=2.0.0
+
+# Feature Engineering & Time Series
+scipy>=1.11.0
+statsmodels>=0.14.0
+
+# Utilities
+tqdm>=4.66.0
+joblib>=1.3.0
