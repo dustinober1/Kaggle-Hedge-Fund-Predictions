@@ -50,6 +50,11 @@ We aggregated key features by `ts_index` (Market) and `code` (Sector) to capture
   - H1: Base Features.
   - H3, H10, H25: Extended Features.
 
+### 6. Ensemble Strategy (Failed)
+We attempted to blend LightGBM (Huber) with XGBoost (Pseudo-Huber) to reduce variance.
+- **Result**: XGBoost produced extremely poor ratios (> 50.0), likely due to gradient scaling issues with the weighted metric.
+- **Conclusion**: LightGBM's Huber implementation is uniquely robust for this task. We proceeded with the pure LightGBM model.
+
 ## Final Solution Architecture
 
 1. **Model**: LightGBM Regressor

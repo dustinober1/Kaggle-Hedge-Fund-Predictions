@@ -150,6 +150,7 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - ✅ **Weight-adaptive shrinkage**: Applying more shrinkage to high-weight samples improves ratio
 
 ### What Doesn't Work
+- ❌ **XGBoost Pseudo-Huber**: produces extremely poor ratios (> 50.0) compared to LightGBM. Deep tuning required.
 - ❌ Using Market features for Horizon 1 (adds noise)
 - ❌ Using raw weights during training (too extreme)
 - ❌ Predicting non-zero without shrinkage (ratio >> 1)
