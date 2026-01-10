@@ -179,6 +179,71 @@ Predicting PERFECTLY:
 
 ---
 
+### Experiment 6: High-Weight Sample Focus (7 Strategies)
+**File**: `src/05_high_weight_focus.py`  
+**Status**: ✅ Complete
+
+**Strategies Tested**:
+| Strategy | Description | Ratio | Score |
+|----------|-------------|-------|-------|
+| S1 | Train on top 10% weights only | 364,680 | 0.000 |
+| S2 | Importance sampling (5x oversample) | 139,495 | 0.000 |
+| S3 | Log-transformed weights | 9.93 | 0.000 |
+| S4 | Selective prediction (90% threshold) | 425,647 | 0.000 |
+| S5 | Per-horizon high-weight models | 412,188 | 0.000 |
+| S6 | **Sqrt-transformed weights** | **1.02** | 0.000 |
+| S7 | Confidence blend | 5,479 | 0.000 |
+
+**Key Finding**: Strategy 6 (sqrt weights) achieved ratio=1.019, very close to beating zero (need ratio < 1.0)!
+
+---
+
+### Experiment 7: Strategy Refinement v2 ⭐ BREAKTHROUGH!
+**File**: `src/06_strategy_refinement_v2.py`  
+**Status**: ✅ Complete - **FIRST SUCCESS!**
+
+**Key Insight**: Apply **shrinkage** to predictions (multiply by small factor) to reduce variance.
+
+**Results**:
+| Strategy | Best Shrinkage | Ratio | Score | Beats Zero? |
+|----------|----------------|-------|-------|-------------|
+| **Huber Loss + Sqrt Weights** | 0.30 | **0.998** | **0.044** | ✅ YES! |
+| Quantile (0.5) | 0.80 | 0.9996 | 0.020 | ✅ YES! |
+| Weight Power Sweep (p=0.6) | 0.20 | 0.9997 | 0.017 | ✅ YES! |
+| Per-Horizon + Shrinkage | varies | 0.9998 | 0.013 | ✅ YES! |
+| Zero Baseline | N/A | 1.000 | 0.000 | - |
+
+**Winning Configuration**:
+- Loss function: **Huber** (robust to outliers)
+- Weight transformation: **sqrt(weight + 1)**
+- Shrinkage factor: **0.30** (predictions × 0.30)
+- This achieved **ratio = 0.998**, meaning predictions are 0.2% better than zero!
+
+---
+
+### Experiment 8: Optimized Submission
+**File**: `src/07_optimized_submission.py`  
+**Status**: ✅ Complete
+
+**Final Approach**: Per-Horizon Huber Models with Horizon-Specific Shrinkage
+
+| Horizon | Shrinkage | Ratio |
+|---------|-----------|-------|
+| 1 | 0.12 | 0.9996 |
+| 3 | 0.06 | 0.9998 |
+| 10 | 0.27 | 0.9976 |
+| 25 | 0.29 | 0.9961 |
+| **Overall** | - | **0.9972** |
+
+**Final Validation Score**: **0.0529** 🎉
+
+**Submission Statistics**:
+- Mean prediction: -0.076
+- Std: 0.225
+- Range: [-2.19, 1.82]
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -191,51 +256,52 @@ Kaggle-hedgefundTimeSeriesForecasting/
 │   ├── train.parquet (922 MB)
 │   └── test.parquet (146 MB)
 ├── src/
-│   ├── 01_data_exploration.py    # Full EDA
-│   ├── 02_lgb_baseline.py        # LightGBM v1
-│   ├── 03_lgb_baseline_v2.py     # Per-horizon models
-│   ├── 04_lgb_baseline_v3.py     # Baseline comparison
-│   └── debug_metric.py           # Metric analysis
+│   ├── 01_data_exploration.py       # Full EDA
+│   ├── 02_lgb_baseline.py           # LightGBM v1
+│   ├── 03_lgb_baseline_v2.py        # Per-horizon models
+│   ├── 04_lgb_baseline_v3.py        # Baseline comparison
+│   ├── 05_high_weight_focus.py      # High-weight strategies
+│   ├── 06_strategy_refinement_v2.py # ⭐ Breakthrough strategies
+│   ├── 07_optimized_submission.py   # Final submission generator
+│   └── debug_metric.py              # Metric analysis
 ├── outputs/
 │   ├── exploration_results.json
-│   ├── submission_lgb_baseline_*.csv
-│   ├── submission_lgb_v2_*.csv
-│   └── submission_v3_*.csv
-├── .venv/                        # Python environment
+│   ├── submission_*.csv             # Various submissions
+│   └── *_results_*.json             # Experiment results
+├── .venv/                           # Python environment
 ├── requirements.txt
-├── GEMINI.md                     # AI assistant context
-└── REPORT.md                     # This file
+├── GEMINI.md                        # AI assistant context
+└── REPORT.md                        # This file
 ```
 
 ---
 
 ## 🎯 Next Steps (Priority Order)
 
-### 1. High-Weight Sample Focus
-- Train models specifically on high-weight samples
-- These contribute 72% of the metric
-- May need specialized feature engineering for these
+### 1. ✅ High-Weight Sample Focus - DONE!
+- ✅ Tried 7 different strategies for high-weight samples
+- ✅ Found sqrt weight transformation works best
+- ✅ Discovered shrinkage is key to beating zero baseline
 
-### 2. Feature Engineering
+### 2. Improve Score Further
+- Fine-tune Huber loss parameters (alpha/delta)
+- Try different shrinkage values per-sample
+- Cross-validate shrinkage on multiple time folds
+
+### 3. Feature Engineering (Next Priority)
 - Lag features (respecting no look-ahead constraint)
 - Rolling statistics (mean, std, min, max over past windows)
 - Entity-level aggregations
-- Time-based features
+- Time-based features (recent vs old data)
 
-### 3. Alternative Modeling Approaches
-- **Quantile Regression**: Predict median instead of mean
-- **Robust Loss Functions**: Huber loss, MAE
-- **Confidence-Based Predictions**: Predict 0 when uncertain
-- **XGBoost/CatBoost**: May handle sparse/noisy data differently
-
-### 4. Ensemble Strategies
-- Blend multiple model types
-- Stacking with meta-learner
-- Per-horizon model selection
+### 4. Alternative Modeling Approaches
+- **XGBoost/CatBoost**: May handle noise differently
+- **Neural Networks**: For entity embeddings
+- **Ensemble**: Blend Huber + Quantile models
 
 ### 5. Validation Strategy Refinement
 - Multiple time-based folds
-- Weight-stratified sampling
+- More robust shrinkage estimation
 - Entity-aware validation
 
 ---
@@ -244,9 +310,23 @@ Kaggle-hedgefundTimeSeriesForecasting/
 
 1. **Understand the metric first**: The skill score design heavily influences strategy
 2. **Weights matter enormously**: Top 10% of samples dominate the evaluation
-3. **Simple baselines are powerful**: Predicting zero is the benchmark
+3. **Simple baselines are powerful**: Predicting zero is the benchmark to beat
 4. **Signal-to-noise is low**: 86 features but top correlation with target is only 0.09
 5. **New entities in test**: 2,299 unseen entity combinations require robust models
+6. ⭐ **Shrinkage is critical**: Raw model predictions are too noisy; shrinking them towards zero dramatically improves performance
+7. ⭐ **Huber loss is robust**: Handles outliers better than MSE for this noisy data
+8. ⭐ **Sqrt weights balance importance**: Neither raw weights (too extreme) nor uniform weights (ignores importance) work well
+
+---
+
+## 🏆 Current Best Results
+
+| Metric | Value |
+|--------|-------|
+| **Validation Score** | **0.0529** |
+| Validation Ratio | 0.9972 |
+| Approach | Per-Horizon Huber + Shrinkage |
+| Weight Transform | sqrt(weight + 1) |
 
 ---
 
@@ -255,7 +335,9 @@ Kaggle-hedgefundTimeSeriesForecasting/
 - [Competition Overview](https://www.kaggle.com/competitions/ts-forecasting/overview)
 - [Competition Data Description](https://www.kaggle.com/competitions/ts-forecasting/data)
 - [LightGBM Documentation](https://lightgbm.readthedocs.io/)
+- [Huber Loss](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.HuberRegressor.html)
 
 ---
 
 *This report will be updated as we make progress on the competition.*
+

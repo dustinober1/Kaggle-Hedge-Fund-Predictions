@@ -1,0 +1,16 @@
+{
+  "timestamp": "20260110_130144",
+  "approach": "per_horizon",
+  "weight_power": 0.5,
+  "single_shrinkage": 0.3400000000000001,
+  "single_ratio": 0.9977848093202559,
+  "single_score": 0.04706581221804286,
+  "per_horizon_shrinkages": {
+    "1": 0.12000000000000002,
+    "3": 0.06,
+    "10": 0.2700000000000001,
+    "25": 0.2900000000000001
+  },
+  "per_horizon_ratio": 0.997206575259536,
+  "per_horizon_score": 0.052852859340474255
+}

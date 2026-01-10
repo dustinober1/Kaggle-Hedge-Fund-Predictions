@@ -75,6 +75,17 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - Generated `outputs/exploration_results.json` with key statistics
 - Created multiple LightGBM baselines (v1, v2, v3)
 - Created `src/debug_metric.py` to analyze competition metric
+- ⭐ Created `src/05_high_weight_focus.py` - tested 7 high-weight strategies
+- ⭐ Created `src/06_strategy_refinement_v2.py` - **BREAKTHROUGH!** Beat zero baseline
+- ⭐ Created `src/07_optimized_submission.py` - Final submission (score: 0.053)
+
+## Current Best Score: 0.0529 🎉
+
+**Winning Configuration:**
+- Loss function: **Huber** (robust to outliers)
+- Weight transformation: **sqrt(weight + 1)**
+- Per-horizon models with horizon-specific shrinkage
+- Shrinkage values: H1=0.12, H3=0.06, H10=0.27, H25=0.29
 
 ## Project Structure
 ```
@@ -90,12 +101,18 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 │   ├── 02_lgb_baseline.py
 │   ├── 03_lgb_baseline_v2.py
 │   ├── 04_lgb_baseline_v3.py
+│   ├── 05_high_weight_focus.py      # High-weight strategies
+│   ├── 06_strategy_refinement_v2.py # ⭐ BREAKTHROUGH strategies
+│   ├── 07_optimized_submission.py   # Final submission
 │   └── debug_metric.py
 ├── outputs/                # Generated outputs
-│   └── exploration_results.json
+│   ├── exploration_results.json
+│   ├── submission_optimized_*.csv
+│   └── *_results_*.json
 ├── notebooks/              # Jupyter notebooks (to be added)
 ├── .venv/                  # Python virtual environment
 ├── requirements.txt        # Project dependencies
+├── REPORT.md              # Competition report
 └── GEMINI.md              # This file
 ```
 
@@ -103,23 +120,28 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 1. ✅ Run data exploration to understand the dataset
 2. ✅ Build LightGBM baselines (all score 0 - need better approach)
 3. ✅ Analyzed competition metric - need to beat zero predictions
-4. Focus on high-weight samples for prediction
-5. Try more sophisticated feature engineering
-6. Consider ensemble methods
+4. ✅ **Focus on high-weight samples - SUCCESS! Score: 0.053**
+5. Try feature engineering (lag features, rolling stats)
+6. Try XGBoost/CatBoost as alternatives
+7. Ensemble methods (blend Huber + Quantile models)
 
-## Winning Strategy
+## Winning Strategy (PROVEN!)
 
-### Critical Competition Insights
-1. **No look-ahead allowed**: Must predict ts_index t using only data from 0 to t
-2. **Test is AFTER train**: Focus on recent training data, consider recency weighting
-3. **New entities in test**: 2,299 entity combinations not in training - need robust global model
-4. **Weighted RMSE**: Top 10% samples contribute 72% of metric!
-5. **Must beat zero**: Predicting anything other than 0 is only worth it if you're ACCURATE
+### Key Discoveries from Experiments
+1. **Shrinkage is critical**: Raw predictions are too noisy, must multiply by 0.1-0.3
+2. **Huber loss beats MSE**: Robust to outliers in this noisy data
+3. **Sqrt weights are optimal**: Neither raw nor log weights work as well
+4. **Per-horizon models help**: Different horizons need different shrinkage values
 
-### Modeling Approaches to Try
-1. **Focus on high-weight samples**: Train/evaluate emphasizing these
-2. **Gradient Boosting**: LightGBM, XGBoost, CatBoost with careful tuning
-3. **Horizon-specific models**: Different models for each horizon (1, 3, 10, 25)
-4. **Entity embeddings**: For handling categorical variables
-5. **Feature engineering**: Lag features, rolling statistics (respecting no look-ahead)
-6. **Ensemble methods**: Stacking multiple approaches
+### What Works
+- ✅ **Huber loss** with sqrt(weight+1) transformation
+- ✅ **Per-horizon models** with horizon-specific shrinkage
+- ✅ **Shrinkage toward zero** (0.06 to 0.29 depending on horizon)
+- ✅ **Simple LightGBM** with max_depth=6, num_leaves=31
+
+### What Doesn't Work
+- ❌ Using raw weights during training (too extreme)
+- ❌ Predicting non-zero without shrinkage (ratio >> 1)
+- ❌ Training only on high-weight samples (loses generalization)
+- ❌ Importance sampling / oversampling
+

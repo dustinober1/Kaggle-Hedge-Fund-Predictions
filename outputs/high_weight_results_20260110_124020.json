@@ -1,0 +1,18 @@
+{
+  "timestamp": "20260110_124020",
+  "best_strategy": "S1: Train Top 10% Weights",
+  "all_scores": {
+    "S1: Train Top 10% Weights": 0.0,
+    "S2: Importance Sampling 5x": 0.0,
+    "S3: Log-Transformed Weights": 0.0,
+    "S4: Selective Prediction (90%)": 0.0,
+    "S5: Per-Horizon High-Weight": 0.0,
+    "S6: Sqrt-Transformed Weights": 0.0,
+    "S7: Confidence Blend": 0,
+    "Zero Baseline": 0.0
+  },
+  "n_features": 86,
+  "n_train": 4123556,
+  "n_val": 1213858,
+  "n_test": 1447107
+}
