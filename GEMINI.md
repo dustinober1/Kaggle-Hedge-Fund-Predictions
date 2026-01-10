@@ -131,8 +131,9 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 3. ✅ Analyzed competition metric - need to beat zero predictions
 4. ✅ **Focus on high-weight samples - SUCCESS! Score: 0.053**
 5. Try feature engineering (lag features, rolling stats)
-6. Try XGBoost/CatBoost as alternatives
-7. Ensemble methods (blend Huber + Quantile models)
+6. ✅ Try XGBoost/CatBoost as alternatives (XGB failed, Score < 0)
+7. ✅ Ensemble methods (blend Huber + Quantile models) (Tested, pure Huber is best)
+8. ✅ Project Documentation (README)
 
 ## Winning Strategy (PROVEN!)
 
