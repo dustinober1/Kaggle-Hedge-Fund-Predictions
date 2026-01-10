@@ -49,12 +49,32 @@ This project is for the Kaggle Hedge Fund Time Series Forecasting competition.
 - Top correlated with target: feature_bz (0.09), feature_cd (0.09)
 - Missing values: feature_at (12.5%), feature_by (11%)
 
+## Metric Analysis (Critical!)
+
+**The competition metric is a SKILL SCORE:**
+```
+Score = sqrt(1 - min(max(ratio, 0), 1))
+where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
+```
+
+**Key Insight:** 
+- Score = 0 means you're no better than predicting ZERO
+- Score > 0 means predictions are CLOSER to true values than zero
+- Predicting any constant other than 0 makes things MUCH WORSE
+
+**Weight dominance:**
+- Top 1% of samples contribute ~25% of denominator
+- Top 10% of samples contribute ~72% of denominator
+- Must focus on high-weight samples!
+
 ## Recent Changes
 - Created Python virtual environment (`.venv`)
 - Updated `.gitignore` to exclude `.venv`, `__pycache__`, etc.
 - Added comprehensive `requirements.txt` with data science packages
 - Created `src/01_data_exploration.py` for full data exploration
 - Generated `outputs/exploration_results.json` with key statistics
+- Created multiple LightGBM baselines (v1, v2, v3)
+- Created `src/debug_metric.py` to analyze competition metric
 
 ## Project Structure
 ```
@@ -66,7 +86,11 @@ This project is for the Kaggle Hedge Fund Time Series Forecasting competition.
 │   ├── train.parquet
 │   └── test.parquet
 ├── src/                    # Source code
-│   └── 01_data_exploration.py
+│   ├── 01_data_exploration.py
+│   ├── 02_lgb_baseline.py
+│   ├── 03_lgb_baseline_v2.py
+│   ├── 04_lgb_baseline_v3.py
+│   └── debug_metric.py
 ├── outputs/                # Generated outputs
 │   └── exploration_results.json
 ├── notebooks/              # Jupyter notebooks (to be added)
@@ -77,10 +101,11 @@ This project is for the Kaggle Hedge Fund Time Series Forecasting competition.
 
 ## Next Steps
 1. ✅ Run data exploration to understand the dataset
-2. Build baseline model with LightGBM
-3. Implement proper time-based cross-validation
-4. Feature engineering based on exploration findings
-5. Advanced modeling and ensembling
+2. ✅ Build LightGBM baselines (all score 0 - need better approach)
+3. ✅ Analyzed competition metric - need to beat zero predictions
+4. Focus on high-weight samples for prediction
+5. Try more sophisticated feature engineering
+6. Consider ensemble methods
 
 ## Winning Strategy
 
@@ -88,12 +113,13 @@ This project is for the Kaggle Hedge Fund Time Series Forecasting competition.
 1. **No look-ahead allowed**: Must predict ts_index t using only data from 0 to t
 2. **Test is AFTER train**: Focus on recent training data, consider recency weighting
 3. **New entities in test**: 2,299 entity combinations not in training - need robust global model
-4. **Weighted RMSE**: Use competition metric in cross-validation and as loss function
-5. **Heavy-tailed target**: Consider robust loss functions or clipping
+4. **Weighted RMSE**: Top 10% samples contribute 72% of metric!
+5. **Must beat zero**: Predicting anything other than 0 is only worth it if you're ACCURATE
 
 ### Modeling Approaches to Try
-1. **Gradient Boosting**: LightGBM, XGBoost, CatBoost
-2. **Horizon-specific models**: Different models for each horizon (1, 3, 10, 25)
-3. **Entity embeddings**: For handling categorical variables
-4. **Feature engineering**: Lag features, rolling statistics (respecting no look-ahead)
-5. **Ensemble methods**: Stacking multiple approaches
+1. **Focus on high-weight samples**: Train/evaluate emphasizing these
+2. **Gradient Boosting**: LightGBM, XGBoost, CatBoost with careful tuning
+3. **Horizon-specific models**: Different models for each horizon (1, 3, 10, 25)
+4. **Entity embeddings**: For handling categorical variables
+5. **Feature engineering**: Lag features, rolling statistics (respecting no look-ahead)
+6. **Ensemble methods**: Stacking multiple approaches

@@ -1,0 +1,22 @@
+{
+  "timestamp": "20260110_121447",
+  "model": "LightGBM Baseline",
+  "val_score": 0.05385613474772037,
+  "n_features": 86,
+  "n_train": 4123556,
+  "n_val": 1213858,
+  "n_test": 1447107,
+  "best_iteration": 29,
+  "top_10_features": [
+    "feature_al",
+    "feature_v",
+    "feature_bp",
+    "feature_cg",
+    "feature_m",
+    "feature_cf",
+    "feature_ce",
+    "feature_l",
+    "feature_u",
+    "feature_aq"
+  ]
+}
