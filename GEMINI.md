@@ -82,19 +82,21 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - ⭐ Created `src/09_feature_engineering.py` - Added Market/Sector features
 - ⭐ Created `src/10_hybrid_submission.py` - Validated Hybrid Strategy (Base for H1, FE for others)
 
-## Current Best Score: ~0.054 (CV Estimate) 🎉
+- ⭐ Created `src/10_hybrid_submission.py` - Validated Hybrid Strategy (Failed on LB compared to Baseline)
+- ⭐ Created `src/11_ensemble_strategy.py` - Ensemble experiment (Negative result)
+- ⭐ Created `src/12_final_submission.py` - **FINAL SAFE SUBMISSION** (Original Features, Alpha 0.5, Aggressive Shrinkage)
 
-**Winning Configuration (Hybrid):**
-- **Model**: LightGBM Huber (alpha=0.1) with sqrt(w+1) weights
-- **Features**: 
-  - Horizon 1: Original features only (Market noise distracts)
-  - Horizon 3, 10, 25: Original + Market/Sector aggregates (Macro trends help)
-- **Shrinkage**:
-  - H1: 0.29 (Base)
-  - H3: 0.27 (FE)
-  - H10: 0.32 (FE)
-  - H25: 0.34 (FE)
-- **Weight-adaptive shrinkage** helps slightly (Apply stronger shrinkage to high-weight samples)
+## Current Best Score: ~0.053 (Baseline Leaderboard Score)
+
+**Winning Configuration (Robust Baseline):**
+- **Model**: LightGBM Huber (alpha=0.5) with sqrt(w+1) weights
+- **Features**: **Original 86 features ONLY** (Market features proved unstable on Test set)
+- **Shrinkage (Conservative)**:
+  - H1: 0.15 (Heavy dampening)
+  - H3: 0.15
+  - H10: 0.28
+  - H25: 0.30
+- **Rationale**: Short terms are noise. Long terms have trend but regime shifts make aggregates risky. Simplicity wins.
 
 ## Project Structure
 ```

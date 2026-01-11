@@ -1,0 +1,11 @@
+{
+  "strategy": "Final Robust Baseline",
+  "features": "Original Only",
+  "alpha": 0.5,
+  "shrinkage": {
+    "1": 0.15,
+    "3": 0.15,
+    "10": 0.28,
+    "25": 0.3
+  }
+}
