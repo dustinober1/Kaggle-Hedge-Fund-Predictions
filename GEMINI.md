@@ -85,18 +85,19 @@ where ratio = sum(w*(y-pred)^2) / sum(w*y^2)
 - ⭐ Created `src/10_hybrid_submission.py` - Validated Hybrid Strategy (Failed on LB compared to Baseline)
 - ⭐ Created `src/11_ensemble_strategy.py` - Ensemble experiment (Negative result)
 - ⭐ Created `src/12_final_submission.py` - **FINAL SAFE SUBMISSION** (Original Features, Alpha 0.5, Aggressive Shrinkage)
+- ⭐ Created `src/13_improved_submission.py` - **Fixed shrinkage regression** (H3: 0.06 not 0.15)
 
 ## Current Best Score: ~0.053 (Baseline Leaderboard Score)
 
 **Winning Configuration (Robust Baseline):**
 - **Model**: LightGBM Huber (alpha=0.5) with sqrt(w+1) weights
 - **Features**: **Original 86 features ONLY** (Market features proved unstable on Test set)
-- **Shrinkage (Conservative)**:
-  - H1: 0.15 (Heavy dampening)
-  - H3: 0.15
-  - H10: 0.28
-  - H25: 0.30
-- **Rationale**: Short terms are noise. Long terms have trend but regime shifts make aggregates risky. Simplicity wins.
+- **Shrinkage (CORRECT values from first successful submission):**
+  - H1: **0.12** (NOT 0.15!)
+  - H3: **0.06** (NOT 0.15! - this was the bug)
+  - H10: **0.27**
+  - H25: **0.29**
+- **Rationale**: Short terms are noise. H3 needs minimal shrinkage (0.06) unlike H1. Simplicity wins.
 
 ## Project Structure
 ```

@@ -1,0 +1,11 @@
+{
+  "strategy": "original_shrinkage",
+  "alpha": 0.5,
+  "shrinkages": {
+    "1": 0.12,
+    "3": 0.06,
+    "10": 0.27,
+    "25": 0.29
+  },
+  "timestamp": "20260111_195509"
+}

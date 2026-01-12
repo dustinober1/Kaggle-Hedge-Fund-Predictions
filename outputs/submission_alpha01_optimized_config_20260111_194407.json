@@ -1,0 +1,5 @@
+{
+  "strategy": "alpha_0.1_optimized",
+  "alpha": 0.1,
+  "shrinkages": {
+    
