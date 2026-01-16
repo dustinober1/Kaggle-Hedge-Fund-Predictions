@@ -1,76 +1,76 @@
-# Kaggle Hedge Fund Time Series Forecasting
+# Kaggle Hedge Fund Time Series Forecasting — Experiment Log
 
-This repository contains the solution for the Kaggle Hedge Fund Time Series Forecasting competition. The goal is to predict future returns for various entities, evaluated on a custom Weighted RMSE skill score.
+This repository is an experiment-driven walk-through of modeling for the Kaggle competition “Hedge fund - Time series forecasting.” The goal is to predict future returns (multiple horizons) and evaluate with a weighted “skill score” based on squared error.
 
-## 🏆 Final Result
-- **Estimated Score**: ~0.054 (Beating the zero baseline significantly)
-- **Rank**: (Hypothetical, as this is a simulation)
+This repo is intentionally organized to show the process: baselines → ablations → postmortems → refined ideas. If you’re looking for the full narrative and lessons learned, start with `REPORT.md`.
 
-## 🧠 Solution Overview
+## What’s Included
 
-Our winning approach treats this problem as a **conservative signal extraction** task. The data is extremely noisy, and standard regression models often perform worse than predicting zero (Score 0).
+- `src/`: numbered scripts that reflect the experiment timeline (EDA, baselines, tuning, feature ablations, ensembling).
+- `outputs/`: generated submissions and logs.
+- `Competition_Rules/`: copied competition overview, dataset description, and official rules.
+- `GEMINI.md`: lightweight project notes / history.
 
-### Key Strategies
-1.  **Robust Loss Function**: We use **LightGBM with Huber Loss** (`alpha=0.1`). This "boxier" loss function is far more robust to the extreme outliers present in the dataset than MSE or MAE.
-2.  **Hybrid Feature Engineering**:
-    *   **Short Horizon (H1)**: Uses only the original anonymized features. Market aggregated features proved to be noise for 1-day predictions.
-    *   **Long Horizons (H3, H10, H25)**: Uses "Extended" features, including global Market Means and Sector Trends. These macro features significantly improve signal for longer-term trends.
-3.  **Robust Shrinkage**:
-    *   Raw model predictions are too confident/variance-heavy.
-    *   We apply a learned **shrinkage factor** of roughly **0.27 to 0.34** (depending on horizon) to all predictions. This dampens the variance and maximizes the competition metric (Ratio).
-4.  **Weight Transformation**: Training uses `sqrt(weight + 1)` sample weights to balance focus between high-value transactions and generalizability.
+## Competition Constraints (Quick Reference)
 
-### Architecture
-- **Model**: LightGBM Regressor (GOSS)
-- **Objective**: Huber ($\delta=0.1$)
-- **Validation**: 3-Fold Time-Series Cross-Validation
+- **Metric**: weighted, clipped RMSE-style “skill score” (see `Competition_Rules/overview.md`).
+- **Leakage control**: for `ts_index = t`, predict using only data up to `t` and process sequentially (see `Competition_Rules/overview.md`).
+- **Submission format**: CSV with `id,prediction` generated from `test.parquet` (see `Competition_Rules/overview.md`).
 
-## 📂 Repository Structure
+## Data (Quick Reference)
 
-```
-├── data/                   # Competition datasets (train.parquet, test.parquet)
-├── outputs/                # Submission files and experimental logs
-├── src/                    # Source code
-│   ├── 01_data_exploration.py       # Initial EDA
-│   ├── 02-04_lgb_baseline_*.py      # Early baseline attempts (Score 0)
-│   ├── 06_strategy_refinement_v2.py # Breakthrough: Finding Huber & Shrinkage
-│   ├── 08_advanced_tuning.py        # Tuning Alpha and per-horizon shrinkage
-│   ├── 09_feature_engineering.py    # Validating Market/Sector features
-│   ├── 10_hybrid_submission.py      # ⭐ FINAL SUBMISSION SCRIPT
-│   └── 11_ensemble_strategy.py      # Ensemble experiment (LightGBM vs XGBoost)
-├── GEMINI.md               # Detailed project context and memory
-├── REPORT.md               # Comprehensive technical report
-└── requirements.txt        # Python dependencies
-```
+- Files: `train.parquet` and `test.parquet` (see `Competition_Rules/data_descripition.md`).
+- Columns include identifiers (`code`, `sub_code`, `sub_category`), time (`ts_index`), `horizon` (1/3/10/25), `weight`, and 86 anonymized features.
+- `weight` is part of the metric; it’s treated as a training weight, not a predictive feature.
 
-## 🚀 Usage
+## Experiment Workflow
+
+- Use time-series splits (no shuffling) and compare changes on the competition metric.
+- Prefer small, one-change-at-a-time ablations (loss function, weighting, feature sets, calibration).
+- Treat prediction calibration (e.g., shrinkage) as a first-class tuning knob because the metric can heavily penalize variance.
+
+## Experiment Map (Scripts)
+
+| Stage | Script(s) | What it explores |
+|------:|-----------|------------------|
+| EDA | `src/01_data_exploration.py` | Data sanity checks, distributions, horizon behavior |
+| Baselines | `src/02_lgb_baseline.py`, `src/03_lgb_baseline_v2.py`, `src/04_lgb_baseline_v3.py` | Basic LightGBM setups and validation scaffolding |
+| Weighting | `src/05_high_weight_focus.py` | Weighting schemes / tradeoffs in generalization |
+| Robust loss + calibration | `src/06_strategy_refinement_v2.py`, `src/08_advanced_tuning.py` | Robust objectives (e.g., Huber) and shrinkage tuning |
+| Feature ablations | `src/09_feature_engineering.py`, `src/10_hybrid_submission.py` | Aggregate/macro features vs. raw anonymized features |
+| Ensembling | `src/11_ensemble_strategy.py` | Blends / alternative learners |
+| Iterations | `src/12_final_submission.py`, `src/13_improved_submission.py`, `src/14_competition_winner.py` | Iterative refinements and consolidation |
+| Benchmarking | `src/15_advanced_score_push.py` | Side-by-side strategy benchmarks (see `GEMINI.md`) |
+
+## Usage
 
 ### Prerequisites
 - Python 3.9+
-- 16GB+ RAM recommended (Dataset ~5GB)
+- Enough RAM to load parquet data for training/validation (size depends on your workflow).
 
 ### Installation
 ```bash
-# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
+source .venv/bin/activate  # On Windows: .venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
 
-### Reproducing the Winning Submission
-Run the hybrid submission script, which implements the best-performing strategy:
+### Download Data
 ```bash
-python src/10_hybrid_submission.py
+kaggle competitions download -c ts-forecasting
 ```
-This will generate `outputs/submission_hybrid_[timestamp].csv`.
 
-### Running Experiments
-To see the validation results for Feature Engineering:
+### Run Key Experiments
 ```bash
+python src/01_data_exploration.py
+python src/02_lgb_baseline.py
+python src/06_strategy_refinement_v2.py
 python src/09_feature_engineering.py
+python src/15_advanced_score_push.py
 ```
 
-## 📊 Detailed Analysis
-For a deep dive into the experimental process, failures (like XGBoost), and detailed metric analysis, please see [REPORT.md](./REPORT.md).
+### Generate a Submission File
+Several scripts emit a `outputs/submission_*.csv` artifact. Pick the script/config you want to evaluate and run it (for example, `src/10_hybrid_submission.py`).
+
+## Read the Narrative
+See `REPORT.md` for a “hypothesis → experiment → takeaway” timeline and the key postmortems that drove later iterations.
